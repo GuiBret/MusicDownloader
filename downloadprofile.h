@@ -26,8 +26,6 @@ public:
     void updateDownloadProfile();
     QString getFilename();
     void updateData(QStringList args);
-signals:
-    void profileCreated(DownloadProfile *currentProfile);
 
 private:
     Ui::DownloadProfile *ui;

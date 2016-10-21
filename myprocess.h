@@ -7,6 +7,7 @@
 #include <QStringList>
 #include "signal.h"
 #include "launcher.h"
+#include "downloadprofile.h"
 
 const int DOWNLOAD_NOT_STARTED = 1;
 const int DOWNLOAD_ABORTED = 2;
@@ -24,8 +25,8 @@ public:
 public slots:
     void pause();
     void restart();
-    void output();
     void readOutput();
+    void relaunchDownload(DownloadProfile *dp);
 signals:
     void infoReached();
     void infoSent(QStringList info);
@@ -35,6 +36,10 @@ private:
     QProcess *p;
     Launcher *parentLauncher;
     int downloadState;
+    QString path = "";
+    DownloadProfile *currentProfile = NULL;
+    QString command = "";
+
 };
 
 #endif // MYPROCESS_H

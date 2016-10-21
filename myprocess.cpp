@@ -12,7 +12,6 @@ void MyProcess::pause()
 
 
     connect(p, SIGNAL(readyReadStandardOutput()), this, SLOT(output()));
-    connect(this, SIGNAL(stateChanged(QProcess::ProcessState)), this, SLOT(output()));
     qint64 pid = this->pid();
     ::kill(pid, SIGSTOP);
     qDebug() << this->pid();
@@ -31,10 +30,7 @@ void MyProcess::restart()
 }
 
 
-void MyProcess::output()
-{
-    QMessageBox::information(NULL, "Hello", "Meug");
-}
+
 /*!
  * \brief MyProcess::downloadFile
  * Step 1 : get the file info
@@ -52,7 +48,7 @@ void MyProcess::downloadFile(QStringList args)
     QString selectedCodec = args[1];
     this->path = args[2];
 
-    QString command = "youtube-dl --extract-audio --audio-format "+ selectedCodec+" -o "+ "\""+ path.simplified() +"."+ selectedCodec+"\"" +" "+url;
+    this->command = "youtube-dl --extract-audio --audio-format "+ selectedCodec+" -o "+ "\""+ path.simplified() +"."+ selectedCodec+"\"" +" "+url;
     connect(this, SIGNAL(readyReadStandardOutput()), this, SLOT(readOutput()));
     connect(this, SIGNAL(infoReached()), this, SLOT(kill()));
     this->start(command);
@@ -70,10 +66,36 @@ void MyProcess::readOutput()
         {
             if(!outputLine.startsWith("Destination"))
             {
+                this->terminate();
                 QStringList fileInfo = Utils::handleInfo(outputLine);
                 fileInfo << this->path;
                 emit infoSent(fileInfo);
+                this->downloadState = DOWNLOAD_ABORTED;
+
             }
         }
+    }
+    else if(this->downloadState == DOWNLOAD_RESTARTED) // Then we relaunch the download
+    {
+        qDebug() << "Hello";
+        qDebug() << output;
+    }
+}
+
+void MyProcess::relaunchDownload(DownloadProfile *dp)
+{
+    if(this->downloadState != DOWNLOAD_ABORTED)
+    {
+        qDebug() << "Wrong state";
+        return;
+    }
+    else
+    {
+        connect(this, SIGNAL(readyReadStandardOutput()), this, SLOT(readOutput()));
+        qDebug() << "Hello";
+        this->currentProfile = dp; // Update file info more easily
+        this->start(this->command);
+        this->downloadState = DOWNLOAD_RESTARTED;
+
     }
 }

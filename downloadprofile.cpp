@@ -18,11 +18,11 @@ DownloadProfile::DownloadProfile(QStringList args, DownloadDisplay *parent) :
 {
     ui->setupUi(this);
     qDebug() << args;
-    filename = args[0]+"."+args[5];
+    filename = args[3];
     percentage = Utils::parseDouble(args[1]);
-    filesize = Utils::parseDouble(args[2]);
-    download_speed = args[3];
-    eta = args[4];
+    filesize = Utils::parseDouble(args[0]);
+    download_speed = args[2].simplified();
+    //eta = args[4];
     QMessageBox::information(this, "d", "Profil créé");
 
 
@@ -32,7 +32,6 @@ DownloadProfile::DownloadProfile(QStringList args, DownloadDisplay *parent) :
 
     parent->appendDownloadProfile(this);
     qDebug() << "Profile created";
-    emit profileCreated(this);
 }
 
 void DownloadProfile::updateWidget()

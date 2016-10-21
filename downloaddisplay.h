@@ -24,6 +24,8 @@ public:
 
     void appendDownloadProfile(DownloadProfile *dp);
     void updateDownloadProfile(QStringList args);
+signals:
+    void profileCreated(DownloadProfile *dp);
 
 private:
     Ui::DownloadDisplay *ui;

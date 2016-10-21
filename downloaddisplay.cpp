@@ -24,6 +24,7 @@ void DownloadDisplay::appendDownloadProfile(DownloadProfile *dp)
     this->downloads.append(dp);
     this->vl_download->addWidget(dp);
     this->repaint();
+    emit profileCreated(dp);
 }
 /*!
  * \brief DownloadDisplay::updateDownloadProfile searches for the download widget in the QVector<T> downloads, modifies its values and updates the window

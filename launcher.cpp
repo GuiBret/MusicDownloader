@@ -179,6 +179,11 @@ void Launcher::disconnectSlots()
 
 void Launcher::createProfile(QStringList info)
 {
-    DownloadProfile *dp = new DownloadProfile(info, this->downloads);
+    DownloadProfile *dp;
+    //connect(downloads, SIGNAL(profileCreated(DownloadProfile*)), process, SLOT(relaunchDownload(DownloadProfile*)));
+
+    dp = new DownloadProfile(info, this->downloads);
+    process->relaunchDownload(dp);
+    qDebug() << "createProfile";
 
 }
