@@ -8,6 +8,7 @@
 #include "signal.h"
 #include "launcher.h"
 #include "downloadprofile.h"
+#include <QUrl>
 
 const int DOWNLOAD_NOT_STARTED = 1;
 const int DOWNLOAD_ABORTED = 2;
@@ -26,6 +27,7 @@ public:
 public slots:
     void readOutput();
     void relaunchDownload(DownloadProfile *dp);
+    QUrl getThumbnailUrl(QString videoUrl);
 signals:
     void infoReached();
     void infoSent(QStringList info);

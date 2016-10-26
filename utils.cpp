@@ -14,7 +14,7 @@ QString Utils::generateLabelEta(QString eta, double percentage, double filesize)
 
 double Utils::parseDouble(QString number)
 {
-    return number.remove(QRegExp("[^0-9]")).toDouble();
+    return number.remove(QRegExp("[^0-9.]")).toDouble();
 }
 
 double Utils::calculatePercentage(double percentage, double filesize)
@@ -47,4 +47,24 @@ bool Utils::checkYoutubeLink(QString clipboardContent)
     //qDebug() << YOUTUBE_LINK.exactMatch(clipboardContent);
     qDebug() << clipboardContent;
     return YOUTUBE_LINK.match(clipboardContent).hasPartialMatch();
+}
+
+QPixmap Utils::getThumbnail(QString url)
+{
+    qDebug() << url;
+    QNetworkAccessManager *nam = new QNetworkAccessManager;
+
+    QEventLoop el;
+    QObject::connect(nam, SIGNAL(finished(QNetworkReply*)), &el, SLOT(quit()));
+    QNetworkReply *rep = nam->get(QNetworkRequest(QUrl(url)));
+    el.exec();
+
+    QPixmap image;
+    image.loadFromData(rep->readAll());
+    image = image.scaled(100, 100);
+    qDebug() << "Image downloaded";
+
+    return image;
+
+
 }

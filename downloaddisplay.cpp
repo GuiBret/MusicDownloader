@@ -10,7 +10,6 @@ DownloadDisplay::DownloadDisplay(QWidget *parent) :
     this->vl_download = new QVBoxLayout();
 
     ui->scrollArea->setLayout(vl_download);
-    vl_download->addWidget(new QLabel("Hello"));
 }
 
 DownloadDisplay::~DownloadDisplay()

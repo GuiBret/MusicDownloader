@@ -6,7 +6,6 @@
 #include "downloadprofile.h"
 #include <QLabel>
 #include <QVBoxLayout>
-#include <QSignalSpy>
 
 class DownloadProfile;
 

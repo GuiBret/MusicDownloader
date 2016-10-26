@@ -18,7 +18,7 @@ Launcher::Launcher(QWidget *parent) :
     connect(ui->btn_browselocation, SIGNAL(clicked()), this, SLOT(browseFileLocation()));
     connect(ui->btn_url, SIGNAL(clicked()), this, SLOT(checkUrlValidity()));
     connect(ui->btn_download, SIGNAL(clicked()), this, SLOT(downloadFile()));
-    //connect(ui->act_showDownload, SIGNAL(triggered(bool)), downloads, SLOT(show()));
+    connect(this, SIGNAL(validUrl()), this, SLOT(searchThumbnail()));
 
     ui->widget_location->setEnabled(false);
     ui->widget_buttons->setEnabled(false);
@@ -53,12 +53,12 @@ void Launcher::checkUrlValidity()
     }
     else
     {
-
         this->ui->lbl_error->setText("Video name : "+ output);
         this->videoName = output;
         this->ui->widget_location->setEnabled(true);
         ui->widget_buttons->setEnabled(true);
         this->videoUrl = url;
+        emit validUrl();
     }
 }
 
@@ -106,4 +106,13 @@ void Launcher::checkClipboard()
         qDebug() <<cb->text();
         this->ui->le_url->setText(cb->text());
     }
+}
+
+void Launcher::searchThumbnail()
+{
+    QString url = this->ui->le_url->text();
+    QPixmap image = Utils::getThumbnail(url);
+    this->ui->lbl_image->setPixmap(Utils::getThumbnail(url));
+    qDebug() << "Hello";
+    this->ui->lbl_image->update();
 }

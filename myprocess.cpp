@@ -104,3 +104,16 @@ void MyProcess::relaunchDownload(DownloadProfile *dp)
         this->start(this->command);
     }
 }
+
+QUrl MyProcess::getThumbnailUrl(QString url)
+{
+    QEventLoop el;
+    qDebug() << "Waiting get thumbnail";
+    connect(this, SIGNAL(finished()), &el, SLOT(quit()));
+    this->start("youtube-dl --get-thumbnail "+ url);
+    el.exec();
+
+    QString thumbnailUrl = this->readAllStandardOutput();
+    qDebug() << "Console output : " <<this->readAllStandardOutput();
+    return QUrl(thumbnailUrl);
+}

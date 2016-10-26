@@ -43,10 +43,12 @@ private slots:
     void downloadFile();
     void createProfile(QStringList info);
     void checkClipboard();
+    void searchThumbnail();
 signals:
     void downloadStarted();
     void profileAdded();
     void downloadFinished();
+    void validUrl();
 };
 
 #endif // LAUNCHER_H
