@@ -7,6 +7,8 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QEventLoop>
+#include <QClipboard>
+
 
 #include "downloaddisplay.h"
 #include "downloadprofile.h"
@@ -33,14 +35,14 @@ private:
     MyProcess *process;
     DownloadDisplay *downloads;
     bool download_started;
+    QClipboard *cb;
 
 private slots:
     void browseFileLocation();
     void checkUrlValidity();
     void downloadFile();
-    void parseError();
-    void disconnectSlots();
     void createProfile(QStringList info);
+    void checkClipboard();
 signals:
     void downloadStarted();
     void profileAdded();

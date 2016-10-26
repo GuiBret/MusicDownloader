@@ -33,7 +33,6 @@ signals:
 
 
 private:
-    QProcess *downloadProcess;
     Launcher *parentLauncher;
     int downloadState;
     QString path = "";

@@ -26,6 +26,7 @@ QStringList Utils::handleInfo(QString output)
 {
     // TODO : improve this
     output = output.replace(" of ", "|").replace(" at ", "|").replace(" ETA ", "|");
+
     QStringList outputList = output.split("|");
     QStringList info;
     QString filesize = QString::number(Utils::parseDouble(outputList[1]));
@@ -34,4 +35,16 @@ QStringList Utils::handleInfo(QString output)
     info << filesize << percentage << eta;
 
     return info;
+}
+
+bool Utils::checkFileLocation(QString path)
+{
+    return (QFile::exists(path));
+}
+
+bool Utils::checkYoutubeLink(QString clipboardContent)
+{
+    //qDebug() << YOUTUBE_LINK.exactMatch(clipboardContent);
+    qDebug() << clipboardContent;
+    return YOUTUBE_LINK.match(clipboardContent).hasPartialMatch();
 }

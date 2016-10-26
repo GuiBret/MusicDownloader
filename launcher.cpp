@@ -11,6 +11,8 @@ Launcher::Launcher(QWidget *parent) :
     downloads = new DownloadDisplay(this);
     downloads->hide();
     this->download_started = false;
+    QClipboard *cb = QApplication::clipboard();
+    connect(cb, SIGNAL(dataChanged()), this, SLOT(checkClipboard()));
 
     connect(ui->btn_exit, SIGNAL(clicked()), qApp, SLOT(quit()));
     connect(ui->btn_browselocation, SIGNAL(clicked()), this, SLOT(browseFileLocation()));
@@ -63,11 +65,11 @@ void Launcher::checkUrlValidity()
 void Launcher::downloadFile()
 {
     QString selectedCodec = ui->cb_codec->currentText();
-    QString path = this->ui->le_filelocation;
+    QString path = this->ui->le_filelocation->text();
     QString filename = this->ui->lbl_error->text().remove("Video name : ");
-    path << "/" << filename << "." << selectedCodec;
-    QEventLoop el;
-    if(!Utils::checkFileLocation(path))
+    path = path + "/" + filename+ "." + selectedCodec;
+
+    if(Utils::checkFileLocation(path))
         QMessageBox::information(this, "Error", "The file has already been downloaded.");
     else
     {
@@ -77,7 +79,6 @@ void Launcher::downloadFile()
 
         connect(process, SIGNAL(infoSent(QStringList)), this, SLOT(createProfile(QStringList)));
         connect(process, SIGNAL(downloadInfoSent(QStringList)), this, SLOT(updateProfile(QStringList)));
-        connect(process, SIGNAL(downloadFinished()), &el, SLOT(quit()));
         connect(downloads, SIGNAL(profileCreated(DownloadProfile*)), process, SLOT(relaunchDownload(DownloadProfile*)));
 
         QString codec = this->ui->cb_codec->currentText();
@@ -87,29 +88,22 @@ void Launcher::downloadFile()
 
         args << this->videoUrl << codec << path;
         process->downloadFile(args);
-        el.quit();
     }
 
 }
 
-
-
-void Launcher::parseError()
-{
-    QMessageBox::critical(this, "Error", process->readAllStandardError());
-}
-
-void Launcher::disconnectSlots()
-{
-    disconnect(process, SIGNAL(readyRead()), this, SLOT(parseError()));
-}
-
 void Launcher::createProfile(QStringList info)
 {
-
-    //connect(downloads, SIGNAL(profileCreated(DownloadProfile*)), process, SLOT(relaunchDownload(DownloadProfile*)));
-
     DownloadProfile *dp = new DownloadProfile(info, this->downloads);
-    //qDebug() << "createProfile";
-
+}
+/*!
+ * \brief Launcher::checkClipboard checks if the clipboard text is a YT link and puts it in the URL lineedit if it is
+ */
+void Launcher::checkClipboard()
+{
+    if(Utils::checkYoutubeLink(cb->text()))
+    {
+        qDebug() <<cb->text();
+        this->ui->le_url->setText(cb->text());
+    }
 }
