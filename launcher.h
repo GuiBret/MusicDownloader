@@ -38,7 +38,6 @@ private slots:
     void browseFileLocation();
     void checkUrlValidity();
     void downloadFile();
-    void parseOutput();
     void parseError();
     void disconnectSlots();
     void createProfile(QStringList info);

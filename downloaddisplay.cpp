@@ -20,10 +20,16 @@ DownloadDisplay::~DownloadDisplay()
 
 void DownloadDisplay::appendDownloadProfile(DownloadProfile *dp)
 {
-
+    QEventLoop el;
+    connect(this, SIGNAL(window_loaded()), &el, SLOT(quit()));
+    connect(this, SIGNAL(window_loaded()), this, SLOT(testSignal()));
     this->downloads.append(dp);
     this->vl_download->addWidget(dp);
     this->repaint();
+    this->show();
+
+    el.processEvents();
+    qDebug() << "profile created @ downloaddisplay";
     emit profileCreated(dp);
 }
 /*!
@@ -33,7 +39,7 @@ void DownloadDisplay::appendDownloadProfile(DownloadProfile *dp)
  */
 void DownloadDisplay::updateDownloadProfile(QStringList args)
 {
-    QString filename = args[0]; // Reminder : args[0] => filename
+    QString filename = args.last(); // Reminder : args[0] => filename
     DownloadProfile *effectiveDownloadProfile;
     qDebug() << downloads.length();
     for(DownloadProfile *dp : downloads)
@@ -54,4 +60,17 @@ void DownloadDisplay::updateDownloadProfile(QStringList args)
     {
         effectiveDownloadProfile->updateData(args);
     }
+}
+
+
+void DownloadDisplay::showEvent(QShowEvent *event)
+{
+    qDebug() << "Window loaded";
+    QWidget::showEvent(event);
+    emit window_loaded();
+}
+
+void DownloadDisplay::testSignal()
+{
+    qDebug() << "Window loaded in test signal";
 }

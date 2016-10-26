@@ -51,6 +51,7 @@ void Launcher::checkUrlValidity()
     }
     else
     {
+
         this->ui->lbl_error->setText("Video name : "+ output);
         this->videoName = output;
         this->ui->widget_location->setEnabled(true);
@@ -62,109 +63,35 @@ void Launcher::checkUrlValidity()
 void Launcher::downloadFile()
 {
     QString selectedCodec = ui->cb_codec->currentText();
-
-
-    process = new MyProcess(this);
-    connect(process, SIGNAL(infoSent(QStringList)), this, SLOT(createProfile(QStringList)));
-    QString codec = this->ui->cb_codec->currentText();
-    QString path = ui->le_filelocation->text()+"/"+videoName;
-    QStringList args;
-
-
-    args << this->videoUrl << codec << path;
-    process->downloadFile(args);
-    process->waitForFinished(-1);
-
-
-    /*
-    //connect(process, SIGNAL(readyReadStandardOutput()), this, SLOT(parseOutput()));
-    connect(process, SIGNAL(readyReadStandardError()), this, SLOT(parseError()));
-    connect(this, SIGNAL(downloadFinished()), &el, SLOT(quit()));
-    connect(this, SIGNAL(downloadFinished()), this, SLOT(disconnectSlots()));
-    QString command = "youtube-dl --extract-audio --audio-format "+ selectedCodec+" -o "+ "\""+ path.simplified() +"."+ selectedCodec+"\"" +" "+videoUrl;
-
-    process->start(command);
-    qDebug() << process->pid();
-    el.exec();
-    */
-    //QMessageBox::information(this, "Yay", "Loop unlocked");
-
-}
-
-
-void Launcher::parseOutput()
-{
-    QString output = process->readAllStandardOutput().simplified();
-    bool download_finished = false;
-    //for()
-
-    qDebug() << output;
-
-    if(output.startsWith("[download]"))
-    {
-        QStringList splittedOutput = output.split("[download]"); // Handle multiple lines
-        splittedOutput.removeAt(0); // Remove the fake first line created by [download] at the beginning
-        for(QString out : splittedOutput)
-        {
-            qDebug() << download_started;
-            if(!out.contains("Destination"))
-            {
-                out.replace("of", "|").replace("at", "|").replace("ETA", "|").replace(" ", "").simplified();
-
-                QStringList outputArgs = out.split("|");
-                qDebug() << outputArgs;
-
-                // If the download is not considered as started yet, we create a new download widget to be added in the downloads window
-                if(!this->download_started)
-                {
-                    QString codec = ui->cb_codec->currentText();
-
-                    outputArgs.insert(0, videoName);
-                    outputArgs.append(codec);
-                    //QMessageBox::information(this, "Hello", "Profile created");
-                    process->pause();
-                    qDebug() << process->pid();
-                    this->download_started = true;
-                    DownloadProfile *dp = new DownloadProfile(outputArgs, downloads);
-                    connect(dp, SIGNAL(profileCreated()), process, SLOT(restart()));
-                    downloads->appendDownloadProfile(dp);
-                    downloads->show();
-                    qDebug() << process->state();
-
-
-                }
-                else
-                {
-                    if (outputArgs[0] == "100%")
-                    {
-
-                        download_started = false;
-                        disconnectSlots();
-                        break;
-                    }
-                    else
-                    {
-                        //QMessageBox::information(this, "Hello", "updating profile");
-                        downloads->updateDownloadProfile(outputArgs);
-                    }
-                }
-            }
-        }
-        //MessageBox::information(this, "", "Coucou");
-
-    }
+    QString path = this->ui->le_filelocation;
+    QString filename = this->ui->lbl_error->text().remove("Video name : ");
+    path << "/" << filename << "." << selectedCodec;
+    QEventLoop el;
+    if(!Utils::checkFileLocation(path))
+        QMessageBox::information(this, "Error", "The file has already been downloaded.");
     else
     {
-        //qDebug() << output;
-    }
 
-    if(download_finished)
-    {
-        QMessageBox::information(this, "Download finished", "The download is finished.");
-        process->terminate();
+        process = new MyProcess(this);
+
+
+        connect(process, SIGNAL(infoSent(QStringList)), this, SLOT(createProfile(QStringList)));
+        connect(process, SIGNAL(downloadInfoSent(QStringList)), this, SLOT(updateProfile(QStringList)));
+        connect(process, SIGNAL(downloadFinished()), &el, SLOT(quit()));
+        connect(downloads, SIGNAL(profileCreated(DownloadProfile*)), process, SLOT(relaunchDownload(DownloadProfile*)));
+
+        QString codec = this->ui->cb_codec->currentText();
+        QString path = ui->le_filelocation->text()+"/"+videoName;
+        QStringList args;
+
+
+        args << this->videoUrl << codec << path;
+        process->downloadFile(args);
+        el.quit();
     }
 
 }
+
 
 
 void Launcher::parseError()
@@ -179,11 +106,10 @@ void Launcher::disconnectSlots()
 
 void Launcher::createProfile(QStringList info)
 {
-    DownloadProfile *dp;
+
     //connect(downloads, SIGNAL(profileCreated(DownloadProfile*)), process, SLOT(relaunchDownload(DownloadProfile*)));
 
-    dp = new DownloadProfile(info, this->downloads);
-    process->relaunchDownload(dp);
-    qDebug() << "createProfile";
+    DownloadProfile *dp = new DownloadProfile(info, this->downloads);
+    //qDebug() << "createProfile";
 
 }

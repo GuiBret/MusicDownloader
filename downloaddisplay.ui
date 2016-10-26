@@ -52,4 +52,7 @@
  </widget>
  <resources/>
  <connections/>
+ <slots>
+  <signal>window_visible()</signal>
+ </slots>
 </ui>

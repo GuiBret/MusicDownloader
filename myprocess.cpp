@@ -3,32 +3,9 @@
 MyProcess::MyProcess(Launcher *parent)
 {
     this->parentLauncher = parent;
-    this->downloadState = 1;
+    this->downloadState = DOWNLOAD_NOT_STARTED;
+    this->downloadProcess = new QProcess();
 }
-
-void MyProcess::pause()
-{
-    p = new QProcess(this);
-
-
-    connect(p, SIGNAL(readyReadStandardOutput()), this, SLOT(output()));
-    qint64 pid = this->pid();
-    ::kill(pid, SIGSTOP);
-    qDebug() << this->pid();
-    qDebug() << "Process paused";
-    qDebug() << this->state();
-}
-
-void MyProcess::restart()
-{
-
-    QProcess p(this);
-    qDebug() << "Goodbye";
-    qint64 pid = this->pid();
-    ::kill(pid, SIGCONT);
-    //p.start("kill -s SIGCONT " + QString::number(pid));
-}
-
 
 
 /*!
@@ -45,40 +22,68 @@ void MyProcess::restart()
 void MyProcess::downloadFile(QStringList args)
 {
     QString url = args[0];
-    QString selectedCodec = args[1];
-    this->path = args[2];
+    selectedCodec = args[1];
+    this->path = args[2].simplified();
 
     this->command = "youtube-dl --extract-audio --audio-format "+ selectedCodec+" -o "+ "\""+ path.simplified() +"."+ selectedCodec+"\"" +" "+url;
-    connect(this, SIGNAL(readyReadStandardOutput()), this, SLOT(readOutput()));
+    connect(this->downloadProcess, SIGNAL(readyReadStandardOutput()), this, SLOT(readOutput()));
     connect(this, SIGNAL(infoReached()), this, SLOT(kill()));
-    this->start(command);
+    this->downloadProcess->start(command);
 
 }
 
 void MyProcess::readOutput()
 {
-    QStringList output = QString(this->readAllStandardOutput()).split("[download] "); // Handling of multiple lines coming at the same time
+    QStringList output = QString(this->downloadProcess->readAllStandardOutput()).split("[download] "); // Handling of multiple lines coming at the same time
+    qDebug() << output;
     output.pop_front();
-    //qDebug() << output;
+
     if(this->downloadState == DOWNLOAD_NOT_STARTED) // We wait for the first [download] line
     {
         for(QString outputLine : output)
         {
             if(!outputLine.startsWith("Destination"))
             {
-                this->terminate();
+                qDebug() << output;
+                //qDebug() << "Download aborted";
+                this->downloadProcess->close();
+                this->downloadState = DOWNLOAD_ABORTED;
+                //qDebug() << this->downloadProcess->state();
                 QStringList fileInfo = Utils::handleInfo(outputLine);
+                qDebug() << this->path;
                 fileInfo << this->path;
                 emit infoSent(fileInfo);
-                this->downloadState = DOWNLOAD_ABORTED;
+
+
+                qDebug() << this->downloadProcess->state();
+                //QMessageBox::information(NULL, "hELL", "FFZSEF");
 
             }
         }
     }
     else if(this->downloadState == DOWNLOAD_RESTARTED) // Then we relaunch the download
     {
-        qDebug() << "Hello";
-        qDebug() << output;
+        for(QString outputLine : output)
+        {
+            if(!outputLine.startsWith("Resuming") && !outputLine.startsWith("Destination"))
+            {
+                QStringList downloadInfo = Utils::handleInfo(outputLine);
+                QString filename = (this->path.split("/").last()) + "."+ this->selectedCodec;
+                downloadInfo << filename;
+
+                if(downloadInfo[1] == "100")
+                    this->downloadState = DOWNLOAD_FINISHED;
+                currentProfile->updateData(downloadInfo);
+                //emit downloadInfoSent(downloadInfo);
+                qDebug() << downloadInfo;
+            }
+
+
+        }
+    }
+    else if(this->downloadState == DOWNLOAD_FINISHED)
+    {
+        qDebug() << "Dl fini";
     }
 }
 
@@ -86,16 +91,21 @@ void MyProcess::relaunchDownload(DownloadProfile *dp)
 {
     if(this->downloadState != DOWNLOAD_ABORTED)
     {
-        qDebug() << "Wrong state";
+        qDebug() << this->downloadState;
+        qDebug() << (dp == NULL);
+        qDebug() << "Myprocess : Wrong state";
+        qDebug() << this->state();
         return;
     }
     else
     {
-        connect(this, SIGNAL(readyReadStandardOutput()), this, SLOT(readOutput()));
-        qDebug() << "Hello";
+        connect(this->downloadProcess, SIGNAL(readyReadStandardOutput()), this, SLOT(readOutput()));
         this->currentProfile = dp; // Update file info more easily
-        this->start(this->command);
         this->downloadState = DOWNLOAD_RESTARTED;
+        this->downloadProcess->start(this->command);
+
+        qDebug() << "Download restarted";
+
 
     }
 }
