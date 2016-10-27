@@ -49,14 +49,15 @@ bool Utils::checkYoutubeLink(QString clipboardContent)
     return YOUTUBE_LINK.match(clipboardContent).hasPartialMatch();
 }
 
-QPixmap Utils::getThumbnail(QString url)
+QPixmap Utils::getThumbnail(QUrl url)
 {
     qDebug() << url;
+    qDebug() << "Hello from Utils::getThumbnail";
     QNetworkAccessManager *nam = new QNetworkAccessManager;
 
     QEventLoop el;
     QObject::connect(nam, SIGNAL(finished(QNetworkReply*)), &el, SLOT(quit()));
-    QNetworkReply *rep = nam->get(QNetworkRequest(QUrl(url)));
+    QNetworkReply *rep = nam->get(QNetworkRequest(url));
     el.exec();
 
     QPixmap image;

@@ -109,11 +109,11 @@ QUrl MyProcess::getThumbnailUrl(QString url)
 {
     QEventLoop el;
     qDebug() << "Waiting get thumbnail";
-    connect(this, SIGNAL(finished()), &el, SLOT(quit()));
-    this->start("youtube-dl --get-thumbnail "+ url);
+    QProcess p;
+    connect(&p, SIGNAL(finished(int)), &el, SLOT(quit()));
+    p.start("youtube-dl --get-thumbnail "+ url);
     el.exec();
 
-    QString thumbnailUrl = this->readAllStandardOutput();
-    qDebug() << "Console output : " <<this->readAllStandardOutput();
-    return QUrl(thumbnailUrl);
+    QString thumbnailUrl = p.readAllStandardOutput();
+    return QUrl(thumbnailUrl.simplified());
 }

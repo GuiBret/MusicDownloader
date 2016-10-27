@@ -31,7 +31,7 @@ public:
     static QStringList handleInfo(QString output);
     static bool checkFileLocation(QString path);
     static bool checkYoutubeLink(QString clipboard);
-    static QPixmap getThumbnail(QString url);
+    static QPixmap getThumbnail(QUrl url);
 private:
     //Multiple regexp's to handle console output
 

@@ -112,7 +112,7 @@ void Launcher::searchThumbnail()
 {
     QString url = this->ui->le_url->text();
     QPixmap image = Utils::getThumbnail(url);
-    this->ui->lbl_image->setPixmap(Utils::getThumbnail(url));
+    this->ui->lbl_image->setPixmap(Utils::getThumbnail(process->getThumbnailUrl(url)));
     qDebug() << "Hello";
     this->ui->lbl_image->update();
 }
