@@ -17,13 +17,17 @@ SOURCES += main.cpp\
     downloaddisplay.cpp \
     downloadprofile.cpp \
     utils.cpp \
-    myprocess.cpp
+    myprocess.cpp \
+    downloadprofilecontextmenu.cpp \
+    download.cpp
 
 HEADERS  += launcher.h \
     downloaddisplay.h \
     downloadprofile.h \
     utils.h \
-    myprocess.h
+    myprocess.h \
+    downloadprofilecontextmenu.h \
+    download.h
 
 FORMS    += launcher.ui \
     downloaddisplay.ui \

@@ -1,9 +1,8 @@
 #include "myprocess.h"
 
-MyProcess::MyProcess(Launcher *parent)
+MyProcess::MyProcess(Download *parent)
 {
-    this->parentLauncher = parent;
-    //this-> = new QProcess();
+    this->parentDownload = parent;
     this->downloadState = DOWNLOAD_NOT_STARTED;
 }
 
@@ -15,19 +14,19 @@ MyProcess::MyProcess(Launcher *parent)
  * Step 3 : Restart download after adding info to the download profile
  *
  * \param args The list of settings used to download the video
- *        args[0] : url
- *        args[1] : codec
- *        args[2] : path
+ * *
  */
-void MyProcess::downloadFile(QStringList args)
+void MyProcess::downloadFile()
 {
-    QString url = args[0];
-    selectedCodec = args[1];
-    this->path = args[2].simplified();
+    QString url = parentDownload->getUrl();
+    QString filename = parentDownload->getFilename();
+    selectedCodec = parentDownload->getCodec();
+    this->path = parentDownload->getPath()+"/"+filename.simplified() +"."+selectedCodec;
+    qDebug() << "Filename : " << path;
 
-    this->command = "youtube-dl --extract-audio --audio-format "+ selectedCodec+" -o "+ "\""+ path.simplified() +"."+ selectedCodec+"\"" +" "+url;
+    this->command = "youtube-dl --extract-audio --audio-format "+ selectedCodec+" -o "+ "\""+ path.simplified() +"\"" +" "+url;
     connect(this, SIGNAL(readyReadStandardOutput()), this, SLOT(readOutput()));
-    connect(this, SIGNAL(infoReached()), this, SLOT(kill()));
+    connect(this, SIGNAL(readyReadStandardError()), this, SLOT(readError()));
     this->start(command);
 
 }
@@ -48,7 +47,7 @@ void MyProcess::readOutput()
 {
     QStringList output = QString(this->readAllStandardOutput()).split("[download] "); // Handling of multiple lines coming at the same time
     output.pop_front();
-
+    qDebug() << output;
     if(this->downloadState == DOWNLOAD_NOT_STARTED) // We wait for the first [download] line
     {
         for(QString outputLine : output)
@@ -71,9 +70,8 @@ void MyProcess::readOutput()
             outputLine = outputLine.simplified();
             if(!outputLine.startsWith("Resuming") && !outputLine.startsWith("Destination"))
             {
-                qDebug() << outputLine;
                 QStringList downloadInfo = Utils::handleInfo(outputLine);
-                QString filename = (this->path.split("/").last()) + "."+ this->selectedCodec;
+                QString filename = (this->path.split("/").last());
                 downloadInfo << filename;
 
                 if(downloadInfo[1] == "100")
@@ -87,10 +85,12 @@ void MyProcess::readOutput()
     else if(this->downloadState == DOWNLOAD_FINISHED)
     {
         //TODO
+
+        emit downloadFinished();
     }
 }
 
-void MyProcess::relaunchDownload(DownloadProfile *dp)
+void MyProcess::relaunchDownload()
 {
     if(this->downloadState != DOWNLOAD_ABORTED)
     {
@@ -99,7 +99,8 @@ void MyProcess::relaunchDownload(DownloadProfile *dp)
     else
     {
         connect(this, SIGNAL(readyReadStandardOutput()), this, SLOT(readOutput()));
-        this->currentProfile = dp; // Update file info more easily
+
+        this->currentProfile = this->parentDownload->getProfile();; // Update file info more easily
         this->downloadState = DOWNLOAD_RESTARTED;
         this->start(this->command);
     }
@@ -108,7 +109,6 @@ void MyProcess::relaunchDownload(DownloadProfile *dp)
 QUrl MyProcess::getThumbnailUrl(QString url)
 {
     QEventLoop el;
-    qDebug() << "Waiting get thumbnail";
     QProcess p;
     connect(&p, SIGNAL(finished(int)), &el, SLOT(quit()));
     p.start("youtube-dl --get-thumbnail "+ url);
@@ -116,4 +116,10 @@ QUrl MyProcess::getThumbnailUrl(QString url)
 
     QString thumbnailUrl = p.readAllStandardOutput();
     return QUrl(thumbnailUrl.simplified());
+}
+
+// DEBUG FUNCTION
+void MyProcess::readError()
+{
+    qDebug() << this->readAllStandardError();
 }

@@ -14,6 +14,7 @@ QString Utils::generateLabelEta(QString eta, double percentage, double filesize)
 
 double Utils::parseDouble(QString number)
 {
+
     return number.remove(QRegExp("[^0-9.]")).toDouble();
 }
 
@@ -51,8 +52,8 @@ bool Utils::checkYoutubeLink(QString clipboardContent)
 
 QPixmap Utils::getThumbnail(QUrl url)
 {
-    qDebug() << url;
-    qDebug() << "Hello from Utils::getThumbnail";
+    qDebug() << ROOT;
+
     QNetworkAccessManager *nam = new QNetworkAccessManager;
 
     QEventLoop el;
@@ -63,9 +64,18 @@ QPixmap Utils::getThumbnail(QUrl url)
     QPixmap image;
     image.loadFromData(rep->readAll());
     image = image.scaled(100, 100);
-    qDebug() << "Image downloaded";
 
     return image;
 
+
+}
+
+void Utils::openFolder(QString path)
+{
+    QStringList pathWithoutFileName = path.split("/");
+    pathWithoutFileName.pop_back();
+    qDebug() << pathWithoutFileName.join("/");
+    QProcess p;
+    p.startDetached("nautilus --browser "+pathWithoutFileName.join("/"));
 
 }

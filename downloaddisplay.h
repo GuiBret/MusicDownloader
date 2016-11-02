@@ -4,10 +4,12 @@
 #include <QWidget>
 #include <QMainWindow>
 #include "downloadprofile.h"
+#include "launcher.h"
 #include <QLabel>
 #include <QVBoxLayout>
 
 class DownloadProfile;
+class Launcher;
 
 namespace Ui {
 class DownloadDisplay;
@@ -18,14 +20,14 @@ class DownloadDisplay : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit DownloadDisplay(QWidget *parent = 0);
+    explicit DownloadDisplay(Launcher *parent);
     ~DownloadDisplay();
-    QVector<DownloadProfile *> downloads;
+    QVector<Download*> downloadList;
+    void enableActions(QString filename);
 
     void appendDownloadProfile(DownloadProfile *dp);
     void updateDownloadProfile(QStringList args);
 signals:
-    void profileCreated(DownloadProfile *dp);
     void window_loaded();
 
 private:
@@ -34,6 +36,8 @@ private:
 private slots:
     void showEvent(QShowEvent *event);
     void testSignal();
+    void appendDownload(Download *d);
+
 };
 
 #endif // DOWNLOADDISPLAY_H
