@@ -15,6 +15,7 @@
 #include <QUrl>
 #include <QEventLoop>
 #include <QProcess>
+#include <QtGlobal>
 
 
 
@@ -26,13 +27,15 @@
 
 //TODO : fix regex problem
 //Multiple regexp's to handle console output
-const QRegularExpression YOUTUBE_LINK("https{0,1}://www{0,1}.youtube.com/watch?v=[a-zA-Z0-9]*");
+const QRegularExpression YOUTUBE_LINK("https{0,1}://www{0,1}.youtube.com/watch\\?v=*");
 
 const QRegExp DOWNLOAD_FINISHED_REGEX("100% of [0-9.]{4,}MiB in [0-9]{2}:[0-9]{2}");
-const QRegExp DESTINATION_REGEX("Destination : [/home]{1,}.[mp4, aac]");
+const QRegExp DESTINATION_REGEX("Destination : (/home(/.*)*[.mp3, .aac])");
+const QRegExp DOWNLOAD_PROGRESS("(\\d+.\\d)% of (\\d+.\\d+[KM]iB) at (\\d+.\\d+[KM]iB/s) ETA ([0-9]{2}:[0-9]{2})");
 
-class Utils
+class Utils : public QObject
 {
+    Q_OBJECT
 public:
     Utils();
     static QString generateLabelEta(QString eta, double percentage, double filesize);
@@ -43,6 +46,8 @@ public:
     static bool checkYoutubeLink(QString clipboard);
     static QPixmap getThumbnail(QUrl url);
     static void openFolder(QString path);
+    static bool checkYoutubeDlInstall();
+    static QStringList handleOutput(QString output);
 private:
 
 

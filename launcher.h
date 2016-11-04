@@ -56,7 +56,6 @@ private slots:
     void browseFileLocation();
     void checkUrlValidity();
     void downloadFile();
-    void createProfile(QStringList info);
     void checkClipboard();
     void searchThumbnail();
     void handleDownloadFinished();

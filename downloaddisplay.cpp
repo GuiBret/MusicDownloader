@@ -22,7 +22,6 @@ void DownloadDisplay::appendDownloadProfile(DownloadProfile *dp)
 {
     QEventLoop el;
     connect(this, SIGNAL(window_loaded()), &el, SLOT(quit()));
-    connect(this, SIGNAL(window_loaded()), this, SLOT(testSignal()));
     this->vl_download->addWidget(dp);
     this->repaint();
     this->show();
@@ -73,15 +72,8 @@ void DownloadDisplay::showEvent(QShowEvent *event)
     }
 
     QWidget::showEvent(event);
-    qDebug() << "Signal emitted";
     emit window_loaded();
 }
-
-void DownloadDisplay::testSignal()
-{
-    qDebug() << "Window loaded in test signal";
-}
-
 
 void DownloadDisplay::enableActions(QString filename)
 {

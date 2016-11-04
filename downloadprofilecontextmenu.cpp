@@ -33,6 +33,7 @@ void DownloadProfileContextMenu::openFolderInBrowser()
 
 void DownloadProfileContextMenu::handleDownloadFinished()
 {
+    qDebug() << "Handle download finished";
     this->deleteFile->setEnabled(true);
     this->removeDownloadFromWidget->setEnabled(true);
 }

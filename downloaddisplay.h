@@ -35,7 +35,6 @@ private:
     QVBoxLayout *vl_download;
 private slots:
     void showEvent(QShowEvent *event);
-    void testSignal();
     void appendDownload(Download *d);
 
 };

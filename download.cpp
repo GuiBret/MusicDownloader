@@ -22,6 +22,7 @@ void Download::startDownload()
 {
     //connect(process, SIGNAL(infoSent(QStringList)), this, SLOT(createProfile(QStringList)));
     connect(process, SIGNAL(infoSent(QStringList)), this, SLOT(initProfile(QStringList)));
+    connect(process, SIGNAL(downloadFinished()), profile, SLOT(handleDownloadFinished()));
     QObject::connect(downloadWindow, SIGNAL(window_loaded()), process, SLOT(relaunchDownload()));
     connect(profile, SIGNAL(profileCreated()), process, SLOT(relaunchDownload()));
 

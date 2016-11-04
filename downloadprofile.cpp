@@ -29,7 +29,7 @@ DownloadProfile::DownloadProfile(Download *parent) :
 
 
     ui->lbl_filename->setText(filename);
-    ui->pb_downloadprogress->setRange(0.0, filesize);
+    ui->pb_downloadprogress->setRange(0.0, 100.0);
     ui->lbl_eta->setText(Utils::generateLabelEta(eta, percentage, filesize));
     emit profileCreated();
 
@@ -64,12 +64,14 @@ void DownloadProfile::updateData(QStringList args)
 {
     if(args.length() == 4)
     {
-
-        double new_percentage = Utils::parseDouble(args[1]); // args[1] : percentage not parsed
+        // Output looks like "0.5% of 25.22MiB at 555KiB/s ETA 00:25" captured in this order
+        double new_percentage = Utils::parseDouble(args[0]); // args[0] : percentage not parsed
+        double filesize = Utils::parseDouble(args[1]);
+        QString download_speed = args[2];
         QString eta  = args[3];
         this->percentage = new_percentage;
         qDebug() << args;
-        double filesize = Utils::parseDouble(args[0]);
+
         this->ui->lbl_eta->setText(Utils::generateLabelEta(eta, percentage, filesize));
         this->updateWidget();
     }

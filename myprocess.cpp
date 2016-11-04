@@ -57,6 +57,7 @@ void MyProcess::readOutput()
                 this->close();
                 this->downloadState = DOWNLOAD_ABORTED;
                 QStringList fileInfo = Utils::handleInfo(outputLine);
+
                 fileInfo << this->path;
                 emit infoSent(fileInfo);
 
@@ -70,11 +71,10 @@ void MyProcess::readOutput()
             outputLine = outputLine.simplified();
             if(!outputLine.startsWith("Resuming") && !outputLine.startsWith("Destination"))
             {
-                QStringList downloadInfo = Utils::handleInfo(outputLine);
+                QStringList downloadInfo = Utils::handleOutput(outputLine);
                 QString filename = (this->path.split("/").last());
-                downloadInfo << filename;
 
-                if(downloadInfo[1] == "100")
+                if(downloadInfo[0] == "100")
                     this->downloadState = DOWNLOAD_FINISHED;
                 currentProfile->updateData(downloadInfo);
             }

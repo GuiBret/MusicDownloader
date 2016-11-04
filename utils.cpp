@@ -8,7 +8,7 @@ Utils::Utils()
 QString Utils::generateLabelEta(QString eta, double percentage, double filesize)
 {
     double downloaded = Utils::calculatePercentage(percentage, filesize);
-    QString labelString = QString::number(downloaded, 'f', 2) + " of "+ QString::number(filesize, 'f', 2) + "MiB downloaded ("+ QString::number(percentage, 'f', 1) +"%)";
+    QString labelString = QString::number(downloaded, 'f', 2) + " of "+ QString::number(filesize, 'f', 2) + tr("MiB downloaded (ETA : ")+ eta +")";
     return labelString;
 }
 
@@ -30,9 +30,11 @@ QStringList Utils::handleInfo(QString output)
 
     QStringList outputList = output.split("|");
     QStringList info;
-    QString filesize = QString::number(Utils::parseDouble(outputList[1]));
     QString percentage = QString::number(Utils::parseDouble(outputList[0]));
-    QString eta = outputList[2];
+    QString filesize = QString::number(Utils::parseDouble(outputList[1]));
+
+
+    QString eta = outputList[3];
     info << filesize << percentage << eta;
 
     return info;
@@ -45,9 +47,9 @@ bool Utils::checkFileLocation(QString path)
 
 bool Utils::checkYoutubeLink(QString clipboardContent)
 {
-    //qDebug() << YOUTUBE_LINK.exactMatch(clipboardContent);
+    qDebug() << YOUTUBE_LINK.match(clipboardContent).hasMatch();
     qDebug() << clipboardContent;
-    return YOUTUBE_LINK.match(clipboardContent).hasPartialMatch();
+    return YOUTUBE_LINK.match(clipboardContent).hasMatch();
 }
 
 QPixmap Utils::getThumbnail(QUrl url)
@@ -74,8 +76,49 @@ void Utils::openFolder(QString path)
 {
     QStringList pathWithoutFileName = path.split("/");
     pathWithoutFileName.pop_back();
-    qDebug() << pathWithoutFileName.join("/");
     QProcess p;
     p.startDetached("nautilus --browser "+pathWithoutFileName.join("/"));
 
+}
+
+bool Utils::checkYoutubeDlInstall()
+{
+    QProcess p;
+    bool installed = true;
+    if(QString(ROOT) == "/") // Unix-based systems
+    {
+        p.start("apt-cache policy youtube-dl");
+        p.waitForFinished(-1);
+        if(p.readAllStandardOutput() == "") // If the program is not installed
+            installed = false;
+    }
+    else if(ROOT == "C:")
+    {
+        // TO BE IMPLEMENTED
+    }
+
+
+    return installed;
+}
+
+QStringList Utils::handleOutput(QString output)
+{
+    QStringList info;
+    if(DOWNLOAD_PROGRESS.exactMatch(output))
+    {
+        int pos =0;
+        while(pos = DOWNLOAD_PROGRESS.indexIn(output, pos) != -1)
+        {
+            qDebug() << DOWNLOAD_PROGRESS.cap(1);
+            info << DOWNLOAD_PROGRESS.cap(1) << DOWNLOAD_PROGRESS.cap(2) << DOWNLOAD_PROGRESS.cap(3) << DOWNLOAD_PROGRESS.cap(4);
+            pos += DOWNLOAD_PROGRESS.matchedLength();
+        }
+        qDebug() << info.join(", ");
+    }
+    else
+    {
+        //TODO : fix
+        info << "100";
+    }
+    return info;
 }

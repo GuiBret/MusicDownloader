@@ -8,14 +8,13 @@ Launcher::Launcher(QWidget *parent) :
     ui(new Ui::Launcher)
 {
 
-
     ui->setupUi(this);
     downloads = new DownloadDisplay(this);
     downloads->hide();
     this->download_started = false;
     QClipboard *cb = QApplication::clipboard();
     connect(cb, SIGNAL(dataChanged()), this, SLOT(checkClipboard()));
-    //connect(this, SIGNAL(youtubeDlNotInstalled()), qApp, SLOT(quit()));
+
     connect(ui->btn_exit, SIGNAL(clicked()), qApp, SLOT(quit()));
     connect(ui->btn_browselocation, SIGNAL(clicked()), this, SLOT(browseFileLocation()));
     connect(ui->btn_url, SIGNAL(clicked()), this, SLOT(checkUrlValidity()));
@@ -26,8 +25,9 @@ Launcher::Launcher(QWidget *parent) :
 
     ui->widget_location->setEnabled(false);
     ui->widget_buttons->setEnabled(false);
+    QString s = "55.1% of 3.81MiB at 568.07KiB/s ETA 00:03";
+    qDebug() <<"Output handled : "+ Utils::handleOutput(s).join(",");
 
-    this->checkYoutubeDlInstall(); // If youtube-dl is not installed, the program will close
 
 }
 
@@ -89,10 +89,7 @@ void Launcher::downloadFile()
     }
 
 }
-void Launcher::createProfile(QStringList info)
-{
-    DownloadProfile *dp = new DownloadProfile(this->searchDownload(this->currentFileName));
-}
+
 /*!
  * \brief Launcher::checkClipboard checks if the clipboard text is a YT link and puts it in the URL lineedit if it is
  */
@@ -102,6 +99,7 @@ void Launcher::checkClipboard()
     if(Utils::checkYoutubeLink(cb->text()))
     {
         this->ui->le_url->setText(cb->text());
+        this->searchThumbnail();
     }
 }
 
@@ -138,18 +136,7 @@ void Launcher::handleDownloadFinished()
     downloads->enableActions(this->currentFileName);
 }
 
-void Launcher::checkYoutubeDlInstall()
-{
-    QProcess p;
-    p.start("youtube");
-    p.waitForFinished(-1);
-    if(p.state() == QProcess::FailedToStart)
-    {
-        //QMessageBox::information(this, "Error", "Youtube-dl is not installed in your computer. Please install it before restarting it.");
-        emit youtubeDlNotInstalled();
-        qApp->quit();
-    }
-}
+
 
 Download *Launcher::searchDownload(QString filename)
 {

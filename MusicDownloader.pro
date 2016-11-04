@@ -19,7 +19,8 @@ SOURCES += main.cpp\
     utils.cpp \
     myprocess.cpp \
     downloadprofilecontextmenu.cpp \
-    download.cpp
+    download.cpp \
+    optionspanel.cpp
 
 HEADERS  += launcher.h \
     downloaddisplay.h \
@@ -27,8 +28,11 @@ HEADERS  += launcher.h \
     utils.h \
     myprocess.h \
     downloadprofilecontextmenu.h \
-    download.h
+    download.h \
+    optionspanel.h
 
 FORMS    += launcher.ui \
     downloaddisplay.ui \
-    downloadprofile.ui
+    downloadprofile.ui \
+    optionspanel.ui
+TRANSLATIONS += md_fr.ts
