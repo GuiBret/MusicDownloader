@@ -94,7 +94,15 @@ bool Utils::checkYoutubeDlInstall()
     }
     else if(ROOT == "C:")
     {
-        // TO BE IMPLEMENTED
+
+        p.start("debug/youtube-dl.exe");
+        p.waitForFinished(-1);
+        if(p.readAllStandardError() == "")
+            installed = false;
+        else
+        {
+            qDebug() << p.readAllStandardOutput();
+        }
     }
 
 

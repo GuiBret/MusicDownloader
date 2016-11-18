@@ -61,6 +61,7 @@ void Download::initProfile(QStringList args)
 
 void Download::updateProfile(QStringList args)
 {
+    qDebug() << "Profile updated";
     this->profile->updateData(args);
 }
 

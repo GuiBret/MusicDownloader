@@ -1,7 +1,6 @@
 #include "launcher.h"
 #include "ui_launcher.h"
 
-typedef qint64 Q_PID;
 
 Launcher::Launcher(QWidget *parent) :
     QMainWindow(parent),
@@ -21,12 +20,9 @@ Launcher::Launcher(QWidget *parent) :
     connect(ui->btn_download, SIGNAL(clicked()), this, SLOT(downloadFile()));
     connect(this, SIGNAL(validUrl()), this, SLOT(searchThumbnail()));
     connect(ui->act_showDownload, SIGNAL(triggered(bool)), downloads, SLOT(show()));
-    //connect(process, SIGNAL(downloadFinished()), this, SLOT(handleDownloadFinished()));
 
     ui->widget_location->setEnabled(false);
     ui->widget_buttons->setEnabled(false);
-    QString s = "55.1% of 3.81MiB at 568.07KiB/s ETA 00:03";
-    qDebug() <<"Output handled : "+ Utils::handleOutput(s).join(",");
 
 
 }

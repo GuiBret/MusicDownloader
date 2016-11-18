@@ -9,6 +9,7 @@
 #include "launcher.h"
 #include "downloadprofile.h"
 #include "download.h"
+#include "stdlib.h"
 #include <QUrl>
 
 const int DOWNLOAD_NOT_STARTED = 1;

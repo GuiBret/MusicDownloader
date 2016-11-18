@@ -16,13 +16,14 @@
 #include <QEventLoop>
 #include <QProcess>
 #include <QtGlobal>
+#include <QApplication>
 
 
 
-#ifdef Q_OS_LINUX
-#define ROOT "/"
-#elif Q_OS_WIN32 | Q_OS_WIN64
+#ifdef Q_OS_WIN32
 #define ROOT "C:"
+#elif Q_OS_LINUX
+#define ROOT "/"
 #endif
 
 //TODO : fix regex problem

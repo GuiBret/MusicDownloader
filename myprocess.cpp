@@ -2,6 +2,10 @@
 
 MyProcess::MyProcess(Download *parent)
 {
+    QProcessEnvironment environment = QProcessEnvironment::systemEnvironment();
+    environment.insert("PATH", qApp->applicationDirPath()+"/bin/");
+    qDebug() << environment.value("PATH");
+    this->setProcessEnvironment(environment);
     this->parentDownload = parent;
     this->downloadState = DOWNLOAD_NOT_STARTED;
 }
@@ -21,10 +25,10 @@ void MyProcess::downloadFile()
     QString url = parentDownload->getUrl();
     QString filename = parentDownload->getFilename();
     selectedCodec = parentDownload->getCodec();
-    this->path = parentDownload->getPath()+"/"+filename.simplified() +"."+selectedCodec;
+    this->path = parentDownload->getPath();
     qDebug() << "Filename : " << path;
 
-    this->command = "youtube-dl --extract-audio --audio-format "+ selectedCodec+" -o "+ "\""+ path.simplified() +"\"" +" "+url;
+    this->command = "youtube-dl --extract-audio --audio-format "+ selectedCodec+" -o "+ "\""+ path.simplified() +"/%(title)s.(ext)s'\"" +" "+url;
     connect(this, SIGNAL(readyReadStandardOutput()), this, SLOT(readOutput()));
     connect(this, SIGNAL(readyReadStandardError()), this, SLOT(readError()));
     this->start(command);
@@ -45,21 +49,27 @@ void MyProcess::downloadFile()
  */
 void MyProcess::readOutput()
 {
-    QStringList output = QString(this->readAllStandardOutput()).split("[download] "); // Handling of multiple lines coming at the same time
+    QString rawOutput = this->readAllStandardOutput();
+    qDebug() << "Output : " +rawOutput;
+
+    QStringList output = QString(rawOutput).split("[download] "); // Handling of multiple lines coming at the same time
     output.pop_front();
-    qDebug() << output;
+    //qDebug() << output;
     if(this->downloadState == DOWNLOAD_NOT_STARTED) // We wait for the first [download] line
     {
         for(QString outputLine : output)
         {
             if(!outputLine.startsWith("Destination"))
             {
-                this->close();
+                this->kill();
                 this->downloadState = DOWNLOAD_ABORTED;
                 QStringList fileInfo = Utils::handleInfo(outputLine);
 
                 fileInfo << this->path;
                 emit infoSent(fileInfo);
+                break;
+                qDebug() << "Info sent";
+                qDebug() << this->state();
 
             }
         }
@@ -71,6 +81,7 @@ void MyProcess::readOutput()
             outputLine = outputLine.simplified();
             if(!outputLine.startsWith("Resuming") && !outputLine.startsWith("Destination"))
             {
+                qDebug() << "Download restarted";
                 QStringList downloadInfo = Utils::handleOutput(outputLine);
                 QString filename = (this->path.split("/").last());
 
@@ -85,7 +96,9 @@ void MyProcess::readOutput()
     else if(this->downloadState == DOWNLOAD_FINISHED)
     {
         //TODO
-
+        qDebug() << "Download finished";
+        qDebug() << output;
+        qDebug() << this->readAllStandardError();
         emit downloadFinished();
     }
 }
@@ -98,10 +111,15 @@ void MyProcess::relaunchDownload()
     }
     else
     {
+        connect(this, SIGNAL(readyReadStandardError()), this, SLOT(readError()));
+        QEventLoop el;
+        qDebug() << "Restarting download";
         connect(this, SIGNAL(readyReadStandardOutput()), this, SLOT(readOutput()));
 
         this->currentProfile = this->parentDownload->getProfile();; // Update file info more easily
         this->downloadState = DOWNLOAD_RESTARTED;
+        connect(this, SIGNAL(stateChanged(QProcess::ProcessState)), &el, SLOT(quit()));
+        el.exec();
         this->start(this->command);
     }
 }
