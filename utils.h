@@ -22,8 +22,10 @@
 
 #ifdef Q_OS_WIN32
 #define ROOT "C:"
+#define EXPLORER "start "
 #elif Q_OS_LINUX
 #define ROOT "/"
+#define EXPLORER "nautilus --browser "
 #endif
 
 //TODO : fix regex problem

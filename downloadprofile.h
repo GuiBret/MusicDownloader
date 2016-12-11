@@ -25,6 +25,7 @@ class DownloadProfile;
 class DownloadProfile : public QWidget
 {
     Q_OBJECT
+    friend class DownloadProfileContextMenu;
 
 public:
     explicit DownloadProfile(Download *parent);
@@ -42,6 +43,7 @@ private:
     QString download_speed;
     double filesize;
     double percentage;
+    QString path;
 
     void updateWidget();
     DownloadProfileContextMenu *contextMenu;

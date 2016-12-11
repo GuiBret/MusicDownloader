@@ -70,9 +70,9 @@ void Launcher::checkUrlValidity()
 void Launcher::downloadFile()
 {
     QString selectedCodec = ui->cb_codec->currentText();
-    QString path = this->ui->le_filelocation->text();
-    QString filename = this->ui->lbl_error->text().remove("Video name : ");
-    path = path + ROOT + filename+ "." + selectedCodec;
+    QString path = this->ui->le_filelocation->text().simplified();
+    QString filename = this->ui->lbl_error->text().remove("Video name : ").simplified();
+    path = path+ "/" + filename+ "." + selectedCodec;
 
     if(Utils::checkFileLocation(path))
         QMessageBox::information(this, "Error", "The file has already been downloaded.");
@@ -165,3 +165,4 @@ QVector<Download*> Launcher::getDownloadList()
 {
     return this->downloadList;
 }
+

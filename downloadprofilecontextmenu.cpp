@@ -28,7 +28,7 @@ DownloadProfileContextMenu::~DownloadProfileContextMenu()
 
 void DownloadProfileContextMenu::openFolderInBrowser()
 {
-    Utils::openFolder(parent->getFilename());
+    Utils::openFolder(parent->path);
 }
 
 void DownloadProfileContextMenu::handleDownloadFinished()

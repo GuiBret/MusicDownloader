@@ -42,6 +42,8 @@ QStringList Utils::handleInfo(QString output)
 
 bool Utils::checkFileLocation(QString path)
 {
+    qDebug() << "Checking file location";
+    qDebug() << path;
     return (QFile::exists(path));
 }
 
@@ -74,10 +76,12 @@ QPixmap Utils::getThumbnail(QUrl url)
 
 void Utils::openFolder(QString path)
 {
+    qDebug() << path;
     QStringList pathWithoutFileName = path.split("/");
-    pathWithoutFileName.pop_back();
     QProcess p;
-    p.startDetached("nautilus --browser "+pathWithoutFileName.join("/"));
+    qDebug() << EXPLORER + path;
+    p.startDetached(EXPLORER + path);
+
 
 }
 
@@ -85,6 +89,8 @@ bool Utils::checkYoutubeDlInstall()
 {
     QProcess p;
     bool installed = true;
+    QString currentFolder = qApp->applicationDirPath();
+
     if(QString(ROOT) == "/") // Unix-based systems
     {
         p.start("apt-cache policy youtube-dl");
@@ -92,10 +98,10 @@ bool Utils::checkYoutubeDlInstall()
         if(p.readAllStandardOutput() == "") // If the program is not installed
             installed = false;
     }
-    else if(ROOT == "C:")
+    else if(ROOT == "C:") // Win32/64
     {
 
-        p.start("debug/youtube-dl.exe");
+        p.start(currentFolder+"/youtube-dl.exe");
         p.waitForFinished(-1);
         if(p.readAllStandardError() == "")
             installed = false;

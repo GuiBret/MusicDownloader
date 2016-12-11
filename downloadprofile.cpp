@@ -21,6 +21,7 @@ DownloadProfile::DownloadProfile(Download *parent) :
     contextMenu = new DownloadProfileContextMenu(this);
 
     filename = parent->getFilename();
+    path = parent->getPath();
     percentage = 0.0;
     filesize = 0.0;
     download_speed = 0.0;

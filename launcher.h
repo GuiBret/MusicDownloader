@@ -52,6 +52,7 @@ private:
     Download *searchDownload(QString filename);
     QUrl getThumbnailUrl(QString url);
 
+
 private slots:
     void browseFileLocation();
     void checkUrlValidity();
